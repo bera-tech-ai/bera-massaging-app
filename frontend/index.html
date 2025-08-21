@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bera - Simple Messaging</title>
+    <title>Bera - WhatsApp Style Messaging</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="/socket.io/socket.io.js"></script>
     <style>
@@ -15,26 +15,26 @@
         }
 
         :root {
-            --primary: #008069;
-            --secondary: #005c4b;
-            --light-bg: #f0f2f5;
-            --dark-bg: #202c33;
-            --chat-bg: #0b141a;
-            --outgoing-msg: #005c4b;
-            --incoming-msg: #202c33;
-            --text-primary: #e9edef;
-            --text-secondary: #8696a0;
-            --icon-color: #aebac1;
-            --border-color: #2f3b43;
-            --online: #00a884;
-            --offline: #8696a0;
-            --hover-bg: #2a3942;
-            --active-bg: #202c33;
+            --wa-green: #008069;
+            --wa-green-dark: #005c4b;
+            --wa-teal-green: #00a884;
+            --wa-chat-bg: #efeae2;
+            --wa-dark-bg: #202c33;
+            --wa-outgoing-msg: #d9fdd3;
+            --wa-incoming-msg: #ffffff;
+            --wa-text-primary: #3b4a54;
+            --wa-text-secondary: #667781;
+            --wa-icon-color: #8696a0;
+            --wa-border-color: #e9edef;
+            --wa-online: #00a884;
+            --wa-offline: #8696a0;
+            --wa-hover-bg: #f5f5f5;
+            --wa-active-bg: #e9edef;
+            --wa-notification: #f15c6d;
         }
 
         body {
-            background: linear-gradient(135deg, var(--primary), var(--dark-bg));
-            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--wa-teal-green), var(--wa-green));
             height: 100vh;
             display: flex;
             justify-content: center;
@@ -45,10 +45,10 @@
         .app-container {
             width: 100%;
             max-width: 1400px;
-            height: 95vh;
-            background: var(--dark-bg);
+            height: 97vh;
+            background: white;
             border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             overflow: hidden;
             display: flex;
         }
@@ -56,9 +56,9 @@
         /* Sidebar */
         .sidebar {
             width: 30%;
-            min-width: 350px;
-            background: var(--dark-bg);
-            border-right: 1px solid var(--border-color);
+            min-width: 380px;
+            background: white;
+            border-right: 1px solid var(--wa-border-color);
             display: flex;
             flex-direction: column;
             height: 100%;
@@ -66,11 +66,11 @@
 
         .sidebar-header {
             padding: 10px 16px;
-            background: var(--dark-bg);
+            background: var(--wa-active-bg);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--wa-border-color);
         }
 
         .user-info {
@@ -82,7 +82,7 @@
         .avatar {
             width: 40px;
             height: 40px;
-            background: var(--primary);
+            background: var(--wa-green);
             border-radius: 50%;
             display: flex;
             justify-content: center;
@@ -90,6 +90,7 @@
             color: white;
             font-weight: bold;
             font-size: 18px;
+            cursor: pointer;
         }
 
         .avatar-small {
@@ -106,17 +107,18 @@
         .user-name {
             font-weight: 500;
             font-size: 16px;
+            color: var(--wa-text-primary);
         }
 
         .user-status {
             font-size: 13px;
-            color: var(--text-secondary);
+            color: var(--wa-text-secondary);
         }
 
         .header-icons {
             display: flex;
             gap: 20px;
-            color: var(--icon-color);
+            color: var(--wa-icon-color);
         }
 
         .header-icons i {
@@ -126,12 +128,12 @@
 
         .search-container {
             padding: 8px 14px;
-            background: var(--dark-bg);
-            border-bottom: 1px solid var(--border-color);
+            background: white;
+            border-bottom: 1px solid var(--wa-border-color);
         }
 
         .search-box {
-            background: var(--hover-bg);
+            background: var(--wa-hover-bg);
             border-radius: 18px;
             padding: 8px 16px;
             display: flex;
@@ -140,14 +142,14 @@
         }
 
         .search-box i {
-            color: var(--text-secondary);
+            color: var(--wa-text-secondary);
             font-size: 14px;
         }
 
         .search-box input {
             background: transparent;
             border: none;
-            color: var(--text-primary);
+            color: var(--wa-text-primary);
             width: 100%;
             font-size: 14px;
             outline: none;
@@ -155,7 +157,7 @@
 
         .search-results {
             position: absolute;
-            background: var(--dark-bg);
+            background: white;
             width: calc(30% - 28px);
             max-height: 300px;
             overflow-y: auto;
@@ -163,12 +165,13 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             z-index: 10;
             margin-top: 5px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--wa-border-color);
         }
 
         .chats-list {
             flex: 1;
             overflow-y: auto;
+            background: white;
         }
 
         .chat-item {
@@ -177,15 +180,15 @@
             padding: 12px 16px;
             cursor: pointer;
             transition: background 0.2s;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--wa-border-color);
         }
 
         .chat-item:hover {
-            background: var(--hover-bg);
+            background: var(--wa-hover-bg);
         }
 
         .chat-item.active {
-            background: var(--active-bg);
+            background: var(--wa-active-bg);
         }
 
         .chat-info {
@@ -203,11 +206,12 @@
         .chat-name {
             font-weight: 500;
             font-size: 16px;
+            color: var(--wa-text-primary);
         }
 
         .chat-time {
             font-size: 12px;
-            color: var(--text-secondary);
+            color: var(--wa-text-secondary);
         }
 
         .chat-bottom {
@@ -218,7 +222,7 @@
 
         .chat-last-msg {
             font-size: 14px;
-            color: var(--text-secondary);
+            color: var(--wa-text-secondary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -232,7 +236,7 @@
         }
 
         .unread-count {
-            background: var(--primary);
+            background: var(--wa-green);
             color: white;
             font-size: 12px;
             padding: 0 6px;
@@ -247,14 +251,14 @@
             display: flex;
             flex-direction: column;
             height: 100%;
-            background: var(--chat-bg);
-            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%233a4b57' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            background: var(--wa-chat-bg);
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4d4d4' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
 
         .chat-header {
             padding: 10px 16px;
-            background: var(--dark-bg);
-            border-bottom: 1px solid var(--border-color);
+            background: var(--wa-active-bg);
+            border-bottom: 1px solid var(--wa-border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -274,17 +278,18 @@
         .current-chat-name {
             font-weight: 500;
             font-size: 16px;
+            color: var(--wa-text-primary);
         }
 
         .current-chat-status {
             font-size: 13px;
-            color: var(--text-secondary);
+            color: var(--wa-text-secondary);
         }
 
         .chat-actions {
             display: flex;
             gap: 20px;
-            color: var(--icon-color);
+            color: var(--wa-icon-color);
         }
 
         .chat-actions i {
@@ -309,17 +314,18 @@
             position: relative;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
         .message.sent {
             align-self: flex-end;
-            background: var(--outgoing-msg);
+            background: var(--wa-outgoing-msg);
             border-top-right-radius: 0;
         }
 
         .message.received {
             align-self: flex-start;
-            background: var(--incoming-msg);
+            background: var(--wa-incoming-msg);
             border-top-left-radius: 0;
         }
 
@@ -327,19 +333,27 @@
             font-size: 15px;
             line-height: 1.4;
             word-wrap: break-word;
+            color: var(--wa-text-primary);
+        }
+
+        .message-sender {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--wa-green);
         }
 
         .message-time {
             font-size: 11px;
-            color: var(--text-secondary);
+            color: var(--wa-text-secondary);
             align-self: flex-end;
             margin-top: 4px;
         }
 
         .chat-input-container {
             padding: 10px 16px;
-            background: var(--dark-bg);
-            border-top: 1px solid var(--border-color);
+            background: var(--wa-active-bg);
+            border-top: 1px solid var(--wa-border-color);
             display: flex;
             align-items: center;
             gap: 10px;
@@ -348,7 +362,7 @@
         .input-actions {
             display: flex;
             gap: 15px;
-            color: var(--icon-color);
+            color: var(--wa-icon-color);
         }
 
         .input-actions i {
@@ -358,20 +372,21 @@
 
         .message-input {
             flex: 1;
-            background: var(--hover-bg);
+            background: white;
             border: none;
             border-radius: 20px;
             padding: 12px 16px;
-            color: var(--text-primary);
+            color: var(--wa-text-primary);
             font-size: 15px;
             outline: none;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
         .send-button {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: var(--primary);
+            background: var(--wa-green);
             color: white;
             border: none;
             display: flex;
@@ -385,12 +400,12 @@
             display: flex;
             width: 100%;
             height: 100%;
-            background: var(--dark-bg);
+            background: white;
         }
 
         .auth-left {
             flex: 1;
-            background: linear-gradient(135deg, var(--primary), var(--dark-bg));
+            background: linear-gradient(135deg, var(--wa-teal-green), var(--wa-green));
             color: white;
             display: flex;
             flex-direction: column;
@@ -408,7 +423,7 @@
             justify-content: center;
             align-items: center;
             padding: 40px;
-            background: var(--dark-bg);
+            background: white;
         }
 
         .auth-form {
@@ -418,7 +433,7 @@
 
         .auth-form h2 {
             margin-bottom: 30px;
-            color: var(--text-primary);
+            color: var(--wa-text-primary);
             text-align: center;
         }
 
@@ -430,22 +445,22 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 500;
-            color: var(--text-primary);
+            color: var(--wa-text-primary);
         }
 
         .form-group input {
             width: 100%;
             padding: 15px;
-            background: var(--hover-bg);
-            border: 1px solid var(--border-color);
+            background: white;
+            border: 1px solid var(--wa-border-color);
             border-radius: 5px;
             font-size: 16px;
-            color: var(--text-primary);
+            color: var(--wa-text-primary);
             transition: border-color 0.3s;
         }
 
         .form-group input:focus {
-            border-color: var(--primary);
+            border-color: var(--wa-green);
             outline: none;
         }
 
@@ -460,23 +475,23 @@
         }
 
         .btn-primary {
-            background: var(--primary);
+            background: var(--wa-green);
             color: white;
             width: 100%;
         }
 
         .btn-primary:hover {
-            background: #006b57;
+            background: var(--wa-green-dark);
         }
 
         .auth-switch {
             margin-top: 20px;
             text-align: center;
-            color: var(--text-secondary);
+            color: var(--wa-text-secondary);
         }
 
         .auth-switch a {
-            color: var(--primary);
+            color: var(--wa-green);
             text-decoration: none;
             font-weight: 600;
         }
@@ -490,20 +505,20 @@
             align-items: center;
             padding: 40px;
             text-align: center;
-            color: var(--text-secondary);
-            background: var(--chat-bg);
-            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%233a4b57' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            color: var(--wa-text-secondary);
+            background: var(--wa-chat-bg);
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4d4d4' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
 
         .welcome-icon {
             font-size: 120px;
-            color: var(--primary);
+            color: var(--wa-green);
             margin-bottom: 20px;
         }
 
         .welcome-title {
             font-size: 32px;
-            color: var(--text-primary);
+            color: var(--wa-text-primary);
             margin-bottom: 15px;
         }
 
@@ -511,6 +526,20 @@
             font-size: 16px;
             max-width: 500px;
             line-height: 1.5;
+        }
+
+        /* Public Chat Room */
+        .public-chat-item {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+
+        .public-chat-item .chat-name {
+            color: #2196f3;
+        }
+
+        .public-message .message-sender {
+            color: #2196f3;
         }
 
         /* Responsive */
@@ -547,8 +576,8 @@
         .spinner {
             width: 40px;
             height: 40px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top: 4px solid var(--primary);
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid var(--wa-green);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -559,10 +588,10 @@
         }
 
         .error {
-            color: #ff6b6b;
+            color: #f44336;
             padding: 10px;
             text-align: center;
-            background: rgba(255, 107, 107, 0.1);
+            background: rgba(244, 67, 54, 0.1);
             border-radius: 5px;
             margin: 10px 0;
         }
@@ -575,18 +604,28 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            border: 2px solid var(--dark-bg);
+            border: 2px solid white;
             position: absolute;
             bottom: 0;
             right: 0;
         }
 
         .online {
-            background: var(--online);
+            background: var(--wa-online);
         }
 
         .offline {
-            background: var(--offline);
+            background: var(--wa-offline);
+        }
+
+        .notification-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--wa-notification);
+            position: absolute;
+            top: -2px;
+            right: -2px;
         }
     </style>
 </head>
@@ -671,6 +710,21 @@
                 </div>
                 
                 <div class="chats-list" id="friendsList">
+                    <div class="chat-item public-chat-item" id="publicChatItem">
+                        <div class="avatar avatar-small" style="background: #2196f3;">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="chat-info">
+                            <div class="chat-top">
+                                <div class="chat-name">Public Chat Room</div>
+                                <div class="chat-time">Now</div>
+                            </div>
+                            <div class="chat-bottom">
+                                <div class="chat-last-msg">Chat with everyone</div>
+                                <div class="chat-status"></div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="loading">
                         <div class="spinner"></div>
                     </div>
@@ -728,6 +782,7 @@
         let friends = [];
         let friendRequests = [];
         let allUsers = [];
+        let isPublicChat = false;
 
         // DOM Elements
         const authScreen = document.getElementById('authScreen');
@@ -751,6 +806,7 @@
         const currentChatAvatar = document.getElementById('currentChatAvatar');
         const currentChatName = document.getElementById('currentChatName');
         const currentChatStatus = document.getElementById('currentChatStatus');
+        const publicChatItem = document.getElementById('publicChatItem');
 
         // Form switching
         function showRegisterForm() {
@@ -888,6 +944,7 @@
             socket.on('friendRequestAccepted', handleFriendRequestAccepted);
             socket.on('typing', handleTyping);
             socket.on('error', handleError);
+            socket.on('publicMessage', handlePublicMessage);
             
             // Load friends and messages
             loadFriends();
@@ -901,6 +958,13 @@
             });
             
             sendButton.addEventListener('click', sendMessage);
+            
+            // Set up public chat room click
+            publicChatItem.addEventListener('click', () => {
+                document.querySelectorAll('.chat-item').forEach(f => f.classList.remove('active'));
+                publicChatItem.classList.add('active');
+                loadPublicChat();
+            });
         }
 
         // Load friends list
@@ -945,44 +1009,92 @@
         // Render friends list
         function renderFriendsList() {
             if (friends.length === 0) {
-                friendsList.innerHTML = '<div class="chat-item"><div class="chat-info"><div class="chat-name">No friends yet</div><div class="chat-last-msg">Search for users to add friends</div></div></div>';
+                friendsList.innerHTML = `
+                    <div class="chat-item public-chat-item" id="publicChatItem">
+                        <div class="avatar avatar-small" style="background: #2196f3;">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="chat-info">
+                            <div class="chat-top">
+                                <div class="chat-name">Public Chat Room</div>
+                                <div class="chat-time">Now</div>
+                            </div>
+                            <div class="chat-bottom">
+                                <div class="chat-last-msg">Chat with everyone</div>
+                                <div class="chat-status"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-item"><div class="chat-info"><div class="chat-name">No friends yet</div><div class="chat-last-msg">Search for users to add friends</div></div></div>`;
+                
+                // Re-add event listener for public chat
+                document.getElementById('publicChatItem').addEventListener('click', () => {
+                    document.querySelectorAll('.chat-item').forEach(f => f.classList.remove('active'));
+                    document.getElementById('publicChatItem').classList.add('active');
+                    loadPublicChat();
+                });
+                
                 return;
             }
             
-            friendsList.innerHTML = '';
-            
-            friends.forEach(friend => {
-                const friendElement = document.createElement('div');
-                friendElement.className = 'chat-item';
-                friendElement.dataset.id = friend._id;
-                
-                friendElement.innerHTML = `
-                    <div class="avatar avatar-small">
-                        ${friend.username.charAt(0).toUpperCase()}
-                        <span class="status-indicator ${friend.online ? 'online' : 'offline'}"></span>
+            let friendsHTML = `
+                <div class="chat-item public-chat-item" id="publicChatItem">
+                    <div class="avatar avatar-small" style="background: #2196f3;">
+                        <i class="fas fa-users"></i>
                     </div>
                     <div class="chat-info">
                         <div class="chat-top">
-                            <div class="chat-name">${friend.username}</div>
-                            <div class="chat-time">${formatTime(friend.lastSeen)}</div>
+                            <div class="chat-name">Public Chat Room</div>
+                            <div class="chat-time">Now</div>
                         </div>
                         <div class="chat-bottom">
-                            <div class="chat-last-msg">Tap to start chatting</div>
+                            <div class="chat-last-msg">Chat with everyone</div>
                             <div class="chat-status"></div>
                         </div>
                     </div>
-                `;
-                
-                friendElement.addEventListener('click', () => {
-                    // Set active friend
-                    document.querySelectorAll('.chat-item').forEach(f => f.classList.remove('active'));
-                    friendElement.classList.add('active');
+                </div>`;
+            
+            friends.forEach(friend => {
+                friendsHTML += `
+                    <div class="chat-item" data-id="${friend._id}">
+                        <div class="avatar avatar-small">
+                            ${friend.username.charAt(0).toUpperCase()}
+                            <span class="status-indicator ${friend.online ? 'online' : 'offline'}"></span>
+                        </div>
+                        <div class="chat-info">
+                            <div class="chat-top">
+                                <div class="chat-name">${friend.username}</div>
+                                <div class="chat-time">${formatTime(friend.lastSeen)}</div>
+                            </div>
+                            <div class="chat-bottom">
+                                <div class="chat-last-msg">Tap to start chatting</div>
+                                <div class="chat-status"></div>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            
+            friendsList.innerHTML = friendsHTML;
+            
+            // Add event listeners to chat items
+            document.querySelectorAll('.chat-item').forEach(item => {
+                if (item.id !== 'publicChatItem') {
+                    const friendId = item.dataset.id;
+                    const friend = friends.find(f => f._id === friendId);
                     
-                    // Load chat with this friend
-                    loadChat(friend);
-                });
-                
-                friendsList.appendChild(friendElement);
+                    item.addEventListener('click', () => {
+                        document.querySelectorAll('.chat-item').forEach(f => f.classList.remove('active'));
+                        item.classList.add('active');
+                        loadChat(friend);
+                    });
+                }
+            });
+            
+            // Re-add event listener for public chat
+            document.getElementById('publicChatItem').addEventListener('click', () => {
+                document.querySelectorAll('.chat-item').forEach(f => f.classList.remove('active'));
+                document.getElementById('publicChatItem').classList.add('active');
+                loadPublicChat();
             });
         }
 
@@ -1112,6 +1224,7 @@
         // Load chat with a friend
         async function loadChat(friend) {
             currentChatFriend = friend;
+            isPublicChat = false;
             
             // Update chat header
             currentChatAvatar.textContent = friend.username.charAt(0).toUpperCase();
@@ -1127,6 +1240,7 @@
             // Enable message input
             messageInput.disabled = false;
             sendButton.disabled = false;
+            messageInput.placeholder = "Type a message";
             messageInput.focus();
             
             // Load messages
@@ -1148,6 +1262,39 @@
                 console.error('Error loading messages:', error);
                 chatMessages.innerHTML = '<div class="error">Error loading messages</div>';
             }
+        }
+
+        // Load public chat
+        function loadPublicChat() {
+            isPublicChat = true;
+            currentChatFriend = null;
+            
+            // Update chat header
+            currentChatAvatar.innerHTML = '<i class="fas fa-users"></i>';
+            currentChatAvatar.style.background = '#2196f3';
+            currentChatName.textContent = 'Public Chat Room';
+            currentChatStatus.textContent = 'Online';
+            
+            // Show chat interface, hide welcome screen
+            welcomeScreen.classList.add('hidden');
+            chatHeader.classList.remove('hidden');
+            chatMessages.classList.remove('hidden');
+            chatInputContainer.classList.remove('hidden');
+            
+            // Enable message input
+            messageInput.disabled = false;
+            sendButton.disabled = false;
+            messageInput.placeholder = "Type a message to everyone";
+            messageInput.focus();
+            
+            // Clear messages and show welcome message
+            chatMessages.innerHTML = `
+                <div class="message received public-message">
+                    <div class="message-sender">System</div>
+                    <div class="message-content">Welcome to the public chat room! Everyone can see your messages here.</div>
+                    <div class="message-time">Just now</div>
+                </div>
+            `;
         }
 
         // Render messages
@@ -1182,13 +1329,24 @@
         function sendMessage() {
             const content = messageInput.value.trim();
             
-            if (!content || !currentChatFriend) return;
+            if (!content) return;
             
-            // Send via socket
-            socket.emit('sendMessage', {
-                receiverId: currentChatFriend._id,
-                content
-            });
+            if (isPublicChat) {
+                // Send public message
+                socket.emit('sendPublicMessage', {
+                    content,
+                    sender: {
+                        id: currentUser.id,
+                        username: currentUser.username
+                    }
+                });
+            } else if (currentChatFriend) {
+                // Send private message
+                socket.emit('sendMessage', {
+                    receiverId: currentChatFriend._id,
+                    content
+                });
+            }
             
             // Clear input
             messageInput.value = '';
@@ -1197,7 +1355,7 @@
         // Handle new message from socket
         function handleNewMessage(message) {
             // Only add if it's from the current chat friend
-            if (message.sender._id === currentChatFriend?._id) {
+            if (message.sender._id === currentChatFriend?._id && !isPublicChat) {
                 const messageElement = document.createElement('div');
                 messageElement.className = 'message received';
                 
@@ -1213,6 +1371,25 @@
                 // Scroll to bottom
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
+        }
+
+        // Handle public message from socket
+        function handlePublicMessage(message) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message received public-message';
+            
+            const time = new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageElement.innerHTML = `
+                <div class="message-sender">${message.sender.username}</div>
+                <div class="message-content">${message.content}</div>
+                <div class="message-time">${time}</div>
+            `;
+            
+            chatMessages.appendChild(messageElement);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
         // Handle message sent confirmation
