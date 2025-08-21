@@ -1,0 +1,21 @@
+{
+  "name": "bera-messaging-platform",
+  "version": "1.0.0",
+  "description": "Bera messaging platform with frontend and backend",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "nodemon backend/server.js",
+    "client": "live-server frontend --port=8080",
+    "install-all": "npm install && cd backend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "live-server": "^1.2.2",
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["messaging", "real-time", "chat"],
+  "author": "Bera Team",
+  "license": "MIT"
+}
