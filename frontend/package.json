@@ -1,0 +1,26 @@
+{
+  "name": "bera-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Bera messaging platform",
+  "main": "index.html",
+  "scripts": {
+    "start": "live-server --port=8080",
+    "build": "echo 'No build process configured'",
+    "dev": "live-server --port=8080 --watch=.",
+    "test": "echo 'No tests specified'"
+  },
+  "keywords": [
+    "messaging",
+    "frontend",
+    "real-time",
+    "chat"
+  ],
+  "author": "Bera Team",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.7.2"
+  }
+}
