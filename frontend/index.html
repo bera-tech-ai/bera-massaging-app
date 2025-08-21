@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bera - Simple Messaging</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        /* All the CSS from the previous frontend implementation */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4e6fff;
+            --secondary: #8a5cff;
+            --light: #f5f7ff;
+            --dark: #333344;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --error: #f44336;
+            --online: #2ecc71;
+            --offline: #95a5a6;
+            --idle: #f39c12;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* Auth Screen */
+        .auth-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .auth-left {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .auth-form {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .auth-form h2 {
+            margin-bottom: 30px;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: #3a5aee;
+            transform: translateY(-2px);
+        }
+
+        .auth-switch {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .auth-switch a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Character Animation */
+        .character {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 200px;
+            transition: all 0.5s;
+        }
+
+        .character-body {
+            width: 100px;
+            height: 120px;
+            background: #FFD166;
+            border-radius: 50px 50px 0 0;
+            position: absolute;
+            bottom: 0;
+            left: 25px;
+        }
+
+        .character-head {
+            width: 80px;
+            height: 80px;
+            background: #FFD166;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 120px;
+            left: 35px;
+        }
+
+        .character-eye {
+            width: 15px;
+            height: 15px;
+            background: #333;
+            border-radius: 50%;
+            position: absolute;
+            top: 30px;
+        }
+
+        .character-eye.left {
+            left: 20px;
+        }
+
+        .character-eye.right {
+            right: 20px;
+        }
+
+        .character-mouth {
+            width: 30px;
+            height: 10px;
+            background: #E56B6F;
+            border-radius: 0 0 15px 15px;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .character-arm {
+            width: 20px;
+            height: 70px;
+            background: #FFD166;
+            border-radius: 10px;
+            position: absolute;
+            bottom: 100px;
+        }
+
+        .character-arm.left {
+            left: 10px;
+            transform: rotate(20deg);
+        }
+
+        .character-arm.right {
+            right: 10px;
+            transform: rotate(-20deg);
+        }
+
+        .character-leg {
+            width: 25px;
+            height: 60px;
+            background: #E56B6F;
+            border-radius: 10px;
+            position: absolute;
+            bottom: -30px;
+        }
+
+        .character-leg.left {
+            left: 35px;
+        }
+
+        .character-leg.right {
+            right: 35px;
+        }
+
+        .handbag {
+            width: 40px;
+            height: 50px;
+            background: #E56B6F;
+            border-radius: 10px;
+            position: absolute;
+            bottom: 70px;
+            left: -10px;
+            transform: rotate(15deg);
+        }
+
+        .thumb {
+            width: 20px;
+            height: 30px;
+            background: #FFD166;
+            border-radius: 10px;
+            position: absolute;
+            bottom: 150px;
+            right: 5px;
+            transform: rotate(45deg);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .form-group:hover ~ .character .thumb {
+            opacity: 1;
+        }
+
+        /* App Screen */
+        .app-container {
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: var(--light);
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .header {
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .search-bar {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .friends-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .friend {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .friend:hover {
+            background: #e8ebff;
+        }
+
+        .friend.active {
+            background: #e0e5ff;
+        }
+
+        .friend-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            position: relative;
+            margin-right: 15px;
+        }
+
+        .status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
+        .online {
+            background: var(--online);
+        }
+
+        .offline {
+            background: var(--offline);
+        }
+
+        .idle {
+            background: var(--idle);
+        }
+
+        .friend-info {
+            flex: 1;
+        }
+
+        .friend-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .friend-status {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .message.sent {
+            align-self: flex-end;
+            background: var(--primary);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.received {
+            align-self: flex-start;
+            background: white;
+            border: 1px solid #ddd;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            margin-top: 5px;
+            opacity: 0.8;
+            text-align: right;
+        }
+
+        .chat-input {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 16px;
+        }
+
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        /* Friend Requests */
+        .friend-requests {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .friend-request {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .request-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .accept-btn {
+            background: var(--success);
+            color: white;
+        }
+
+        .reject-btn {
+            background: var(--error);
+            color: white;
+        }
+
+        /* Search Results */
+        .search-results {
+            position: absolute;
+            background: white;
+            width: calc(100% - 30px);
+            max-height: 200px;
+            overflow-y: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 10;
+            margin-top: 5px;
+        }
+
+        .search-result {
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-result:hover {
+            background: #f0f0f0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                height: 95vh;
+                border-radius: 15px;
+            }
+            
+            .auth-container {
+                flex-direction: column;
+            }
+            
+            .auth-left {
+                padding: 20px;
+            }
+            
+            .character {
+                position: relative;
+                margin-top: 20px;
+                bottom: 0;
+            }
+        }
+
+        /* Loading and Error States */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            color: var(--error);
+            padding: 10px;
+            text-align: center;
+            background: #ffebee;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Authentication Screen -->
+        <div class="auth-container" id="authScreen">
+            <div class="auth-left">
+                <h1>Welcome to Bera</h1>
+                <p>Simple, secure messaging for everyone</p>
+                <div class="character">
+                    <div class="character-body"></div>
+                    <div class="character-head">
+                        <div class="character-eye left"></div>
+                        <div class="character-eye right"></div>
+                        <div class="character-mouth"></div>
+                    </div>
+                    <div class="character-arm left"></div>
+                    <div class="character-arm right">
+                        <div class="thumb"></div>
+                    </div>
+                    <div class="character-leg left"></div>
+                    <div class="character-leg right"></div>
+                    <div class="handbag"></div>
+                </div>
+            </div>
+            <div class="auth-right">
+                <div class="auth-form" id="loginForm">
+                    <h2>Login to Your Account</h2>
+                    <div id="loginError" class="error hidden"></div>
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter your password">
+                    </div>
+                    <button class="btn btn-primary" onclick="login()">Login</button>
+                    <div class="auth-switch">
+                        Don't have an account? <a href="#" onclick="showRegisterForm()">Register</a>
+                    </div>
+                </div>
+                
+                <div class="auth-form" id="registerForm" style="display: none;">
+                    <h2>Create an Account</h2>
+                    <div id="registerError" class="error hidden"></div>
+                    <div class="form-group">
+                        <label for="registerName">Username</label>
+                        <input type="text" id="registerName" placeholder="Choose a username">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail">Email</label>
+                        <input type="email" id="registerEmail" placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Password</label>
+                        <input type="password" id="registerPassword" placeholder="Create a password">
+                    </div>
+                    <button class="btn btn-primary" onclick="register()">Register</button>
+                    <div class="auth-switch">
+                        Already have an account? <a href="#" onclick="showLoginForm()">Login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main App Screen -->
+        <div class="app-container" id="appScreen">
+            <div class="sidebar">
+                <div class="header">
+                    <div class="user-info">
+                        <div class="avatar" id="userAvatar">JD</div>
+                        <div id="userName">John Doe</div>
+                    </div>
+                    <i class="fas fa-sign-out-alt" onclick="logout()" style="cursor: pointer;"></i>
+                </div>
+                
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search for friends..." oninput="searchUsers()">
+                    <div id="searchResults" class="search-results hidden"></div>
+                </div>
+                
+                <div class="friend-requests" id="friendRequestsSection">
+                    <h3>Friend Requests</h3>
+                    <div id="friendRequestsList"></div>
+                </div>
+                
+                <div class="friends-list" id="friendsList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-container">
+                <div class="chat-header" id="chatHeader">
+                    <div>Select a friend to start chatting</div>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message-info">Select a friend to start chatting</div>
+                </div>
+                
+                <div class="chat-input">
+                    <input type="text" id="messageInput" placeholder="Type a message..." disabled>
+                    <button class="send-btn" id="sendButton" disabled><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API base URL - will be the same as the current domain in production
+        const API_BASE = window.location.origin + '/api';
+        let socket = null;
+        let currentUser = null;
+        let currentChatFriend = null;
+        let friends = [];
+        let friendRequests = [];
+
+        // DOM Elements
+        const authScreen = document.getElementById('authScreen');
+        const appScreen = document.getElementById('appScreen');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const loginError = document.getElementById('loginError');
+        const registerError = document.getElementById('registerError');
+        const friendsList = document.getElementById('friendsList');
+        const friendRequestsSection = document.getElementById('friendRequestsSection');
+        const friendRequestsList = document.getElementById('friendRequestsList');
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const chatHeader = document.getElementById('chatHeader');
+
+        // Form switching
+        function showRegisterForm() {
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+            loginError.classList.add('hidden');
+        }
+
+        function showLoginForm() {
+            registerForm.style.display = 'none';
+            loginForm.style.display = 'block';
+            registerError.classList.add('hidden');
+        }
+
+        // Authentication functions
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                showError(loginError, 'Please fill in all fields');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Save token and user data
+                    localStorage.setItem('beraToken', data.token);
+                    localStorage.setItem('beraUser', JSON.stringify(data.user));
+                    
+                    // Initialize app
+                    initApp(data.user, data.token);
+                } else {
+                    showError(loginError, data.error || 'Login failed');
+                }
+            } catch (error) {
+                showError(loginError, 'Network error. Please try again.');
+            }
+        }
+
+        async function register() {
+            const username = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            
+            if (!username || !email || !password) {
+                showError(registerError, 'Please fill in all fields');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Save token and user data
+                    localStorage.setItem('beraToken', data.token);
+                    localStorage.setItem('beraUser', JSON.stringify(data.user));
+                    
+                    // Initialize app
+                    initApp(data.user, data.token);
+                } else {
+                    showError(registerError, data.error || 'Registration failed');
+                }
+            } catch (error) {
+                showError(registerError, 'Network error. Please try again.');
+            }
+        }
+
+        function logout() {
+            if (socket) {
+                socket.disconnect();
+            }
+            
+            localStorage.removeItem('beraToken');
+            localStorage.removeItem('beraUser');
+            
+            appScreen.style.display = 'none';
+            authScreen.style.display = 'flex';
+            
+            // Reset forms
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('registerName').value = '';
+            document.getElementById('registerEmail').value = '';
+            document.getElementById('registerPassword').value = '';
+            
+            loginError.classList.add('hidden');
+            registerError.classList.add('hidden');
+            
+            showLoginForm();
+        }
+
+        // Initialize the app
+        function initApp(user, token) {
+            currentUser = user;
+            
+            // Update UI
+            userAvatar.textContent = user.username.charAt(0).toUpperCase();
+            userName.textContent = user.username;
+            
+            // Switch to app screen
+            authScreen.style.display = 'none';
+            appScreen.style.display = 'flex';
+            
+            // Connect to Socket.IO
+            socket = io();
+            
+            // Authenticate socket
+            socket.emit('authenticate', token);
+            
+            // Set up socket event listeners
+            socket.on('newMessage', handleNewMessage);
+            socket.on('messageSent', handleMessageSent);
+            socket.on('userOnline', handleUserOnline);
+            socket.on('userOffline', handleUserOffline);
+            socket.on('friendRequest', handleFriendRequest);
+            socket.on('friendRequestAccepted', handleFriendRequestAccepted);
+            socket.on('typing', handleTyping);
+            socket.on('error', handleError);
+            
+            // Load friends and messages
+            loadFriends();
+            loadFriendRequests();
+            
+            // Set up message sending
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            sendButton.addEventListener('click', sendMessage);
+        }
+
+        // Load friends list
+        async function loadFriends() {
+            try {
+                const token = localStorage.getItem('beraToken');
+                const response = await fetch(`${API_BASE}/friends`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    friends = await response.json();
+                    renderFriendsList();
+                } else {
+                    console.error('Failed to load friends');
+                }
+            } catch (error) {
+                console.error('Error loading friends:', error);
+            }
+        }
+
+        // Render friends list
+        function renderFriendsList() {
+            if (friends.length === 0) {
+                friendsList.innerHTML = '<div class="message-info">No friends yet. Search for users to add friends!</div>';
+                return;
+            }
+            
+            friendsList.innerHTML = '';
+            
+            friends.forEach(friend => {
+                const friendElement = document.createElement('div');
+                friendElement.className = 'friend';
+                friendElement.dataset.id = friend._id;
+                
+                friendElement.innerHTML = `
+                    <div class="friend-avatar">
+                        ${friend.username.charAt(0).toUpperCase()}
+                        <span class="status ${friend.online ? 'online' : 'offline'}"></span>
+                    </div>
+                    <div class="friend-info">
+                        <div class="friend-name">${friend.username}</div>
+                        <div class="friend-status">${friend.online ? 'Online' : 'Offline'}</div>
+                    </div>
+                `;
+                
+                friendElement.addEventListener('click', () => {
+                    // Set active friend
+                    document.querySelectorAll('.friend').forEach(f => f.classList.remove('active'));
+                    friendElement.classList.add('active');
+                    
+                    // Load chat with this friend
+                    loadChat(friend);
+                });
+                
+                friendsList.appendChild(friendElement);
+            });
+        }
+
+        // Load friend requests
+        async function loadFriendRequests() {
+            // In a real app, you would fetch friend requests from the server
+            // For this demo, we'll use mock data
+            friendRequests = [
+                { _id: '1', from: { _id: '2', username: 'AliceSmith' } },
+                { _id: '2', from: { _id: '3', username: 'BobJohnson' } }
+            ];
+            
+            renderFriendRequests();
+        }
+
+        // Render friend requests
+        function renderFriendRequests() {
+            if (friendRequests.length === 0) {
+                friendRequestsSection.style.display = 'none';
+                return;
+            }
+            
+            friendRequestsSection.style.display = 'block';
+            friendRequestsList.innerHTML = '';
+            
+            friendRequests.forEach(request => {
+                const requestElement = document.createElement('div');
+                requestElement.className = 'friend-request';
+                requestElement.innerHTML = `
+                    <div>${request.from.username}</div>
+                    <div class="request-actions">
+                        <button class="request-btn accept-btn" onclick="acceptFriendRequest('${request._id}')">Accept</button>
+                        <button class="request-btn reject-btn" onclick="rejectFriendRequest('${request._id}')">Reject</button>
+                    </div>
+                `;
+                
+                friendRequestsList.appendChild(requestElement);
+            });
+        }
+
+        // Search users
+        async function searchUsers() {
+            const query = searchInput.value.trim();
+            
+            if (query.length < 2) {
+                searchResults.classList.add('hidden');
+                return;
+            }
+            
+            try {
+                const token = localStorage.getItem('beraToken');
+                const response = await fetch(`${API_BASE}/users/search?q=${encodeURIComponent(query)}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const users = await response.json();
+                    renderSearchResults(users);
+                }
+            } catch (error) {
+                console.error('Error searching users:', error);
+            }
+        }
+
+        // Render search results
+        function renderSearchResults(users) {
+            if (users.length === 0) {
+                searchResults.innerHTML = '<div class="search-result">No users found</div>';
+                searchResults.classList.remove('hidden');
+                return;
+            }
+            
+            searchResults.innerHTML = '';
+            
+            users.forEach(user => {
+                const resultElement = document.createElement('div');
+                resultElement.className = 'search-result';
+                
+                // Check if already friends
+                const isFriend = friends.some(friend => friend._id === user._id);
+                
+                resultElement.innerHTML = `
+                    <div>${user.username}</div>
+                    <div>
+                        ${isFriend ? 
+                            '<span>Already friends</span>' : 
+                            `<button class="request-btn accept-btn" onclick="sendFriendRequest('${user._id}')">Add Friend</button>`
+                        }
+                    </div>
+                `;
+                
+                searchResults.appendChild(resultElement);
+            });
+            
+            searchResults.classList.remove('hidden');
+        }
+
+        // Hide search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.classList.add('hidden');
+            }
+        });
+
+        // Send friend request
+        async function sendFriendRequest(userId) {
+            try {
+                const token = localStorage.getItem('beraToken');
+                const response = await fetch(`${API_BASE}/friend-request/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    alert('Friend request sent!');
+                    searchResults.classList.add('hidden');
+                    searchInput.value = '';
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Failed to send friend request');
+                }
+            } catch (error) {
+                console.error('Error sending friend request:', error);
+            }
+        }
+
+        // Accept friend request
+        async function acceptFriendRequest(requestId) {
+            try {
+                const token = localStorage.getItem('beraToken');
+                const response = await fetch(`${API_BASE}/friend-request/${requestId}/respond`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: 'accepted' })
+                });
+                
+                if (response.ok) {
+                    // Remove from requests and reload friends
+                    friendRequests = friendRequests.filter(req => req._id !== requestId);
+                    renderFriendRequests();
+                    loadFriends();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Failed to accept friend request');
+                }
+            } catch (error) {
+                console.error('Error accepting friend request:', error);
+            }
+        }
+
+        // Reject friend request
+        async function rejectFriendRequest(requestId) {
+            try {
+                const token = localStorage.getItem('beraToken');
+                const response = await fetch(`${API_BASE}/friend-request/${requestId}/respond`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: 'rejected' })
+                });
+                
+                if (response.ok) {
+                    // Remove from requests
+                    friendRequests = friendRequests.filter(req => req._id !== requestId);
+                    renderFriendRequests();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Failed to reject friend request');
+                }
+            } catch (error) {
+                console.error('Error rejecting friend request:', error);
+            }
+        }
+
+        // Load chat with a friend
+        async function loadChat(friend) {
+            currentChatFriend = friend;
+            
+            // Update chat header
+            chatHeader.innerHTML = `
+                <div class="user-info">
+                    <div class="friend-avatar">
+                        ${friend.username.charAt(0).toUpperCase()}
+                        <span class="status ${friend.online ? 'online' : 'offline'}"></span>
+                    </div>
+                    <div>${friend.username}</div>
+                </div>
+            `;
+            
+            // Enable message input
+            messageInput.disabled = false;
+            sendButton.disabled = false;
+            messageInput.focus();
+            
+            // Load messages
+            try {
+                const token = localStorage.getItem('beraToken');
+                const response = await fetch(`${API_BASE}/messages/${friend._id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const messages = await response.json();
+                    renderMessages(messages);
+                } else {
+                    chatMessages.innerHTML = '<div class="error">Failed to load messages</div>';
+                }
+            } catch (error) {
+                console.error('Error loading messages:', error);
+                chatMessages.innerHTML = '<div class="error">Error loading messages</div>';
+            }
+        }
+
+        // Render messages
+        function renderMessages(messages) {
+            if (messages.length === 0) {
+                chatMessages.innerHTML = '<div class="message-info">No messages yet. Start the conversation!</div>';
+                return;
+            }
+            
+            chatMessages.innerHTML = '';
+            
+            messages.forEach(message => {
+                const isSent = message.sender._id === currentUser.id;
+                const messageElement = document.createElement('div');
+                messageElement.className = `message ${isSent ? 'sent' : 'received'}`;
+                
+                const time = new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                messageElement.innerHTML = `
+                    <div>${message.content}</div>
+                    <div class="message-time">${time}</div>
+                `;
+                
+                chatMessages.appendChild(messageElement);
+            });
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Send message
+        function sendMessage() {
+            const content = messageInput.value.trim();
+            
+            if (!content || !currentChatFriend) return;
+            
+            // Send via socket
+            socket.emit('sendMessage', {
+                receiverId: currentChatFriend._id,
+                content
+            });
+            
+            // Clear input
+            messageInput.value = '';
+        }
+
+        // Handle new message from socket
+        function handleNewMessage(message) {
+            // Only add if it's from the current chat friend
+            if (message.sender._id === currentChatFriend?._id) {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message received';
+                
+                const time = new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                messageElement.innerHTML = `
+                    <div>${message.content}</div>
+                    <div class="message-time">${time}</div>
+                `;
+                
+                chatMessages.appendChild(messageElement);
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        // Handle message sent confirmation
+        function handleMessageSent(message) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message sent';
+            
+            const time = new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageElement.innerHTML = `
+                <div>${message.content}</div>
+                <div class="message-time">${time}</div>
+            `;
+            
+            chatMessages.appendChild(messageElement);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Handle user online event
+        function handleUserOnline(data) {
+            const friendElement = document.querySelector(`.friend[data-id="${data.userId}"]`);
+            if (friendElement) {
+                const statusElement = friendElement.querySelector('.status');
+                statusElement.className = 'status online';
+                
+                const statusText = friendElement.querySelector('.friend-status');
+                statusText.textContent = 'Online';
+                
+                // If this is the current chat friend, update header
+                if (currentChatFriend && currentChatFriend._id === data.userId) {
+                    const headerStatus = chatHeader.querySelector('.status');
+                    headerStatus.className = 'status online';
+                }
+            }
+        }
+
+        // Handle user offline event
+        function handleUserOffline(data) {
+            const friendElement = document.querySelector(`.friend[data-id="${data.userId}"]`);
+            if (friendElement) {
+                const statusElement = friendElement.querySelector('.status');
+                statusElement.className = 'status offline';
+                
+                const statusText = friendElement.querySelector('.friend-status');
+                statusText.textContent = 'Offline';
+                
+                // If this is the current chat friend, update header
+                if (currentChatFriend && currentChatFriend._id === data.userId) {
+                    const headerStatus = chatHeader.querySelector('.status');
+                    headerStatus.className = 'status offline';
+                }
+            }
+        }
+
+        // Handle new friend request
+        function handleFriendRequest(data) {
+            // Add to requests and update UI
+            friendRequests.push({
+                _id: Date.now().toString(), // Temporary ID for UI
+                from: data.from
+            });
+            
+            renderFriendRequests();
+        }
+
+        // Handle friend request accepted
+        function handleFriendRequestAccepted(data) {
+            // Reload friends list
+            loadFriends();
+            
+            // Show notification
+            alert(`${data.by.username} accepted your friend request!`);
+        }
+
+        // Handle typing indicator
+        function handleTyping(data) {
+            // You could implement a typing indicator in the UI
+            console.log(`User ${data.userId} is ${data.isTyping ? 'typing' : 'not typing'}`);
+        }
+
+        // Handle errors from socket
+        function handleError(data) {
+            console.error('Socket error:', data.message);
+        }
+
+        // Utility function to show errors
+        function showError(element, message) {
+            element.textContent = message;
+            element.classList.remove('hidden');
+        }
+
+        // Check if user is already logged in
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('beraToken');
+            const userData = localStorage.getItem('beraUser');
+            
+            if (token && userData) {
+                const user = JSON.parse(userData);
+                initApp(user, token);
+            }
+        });
+    </script>
+</body>
+</html>
