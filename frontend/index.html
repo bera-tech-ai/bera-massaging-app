@@ -1331,7 +1331,24 @@
             
             if (!content) return;
             
+            // Immediately show the message in the UI for better user experience
+            const tempId = Date.now();
             if (isPublicChat) {
+                // Show public message immediately
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message sent';
+                messageElement.id = 'temp-' + tempId;
+                
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                messageElement.innerHTML = `
+                    <div class="message-content">${content}</div>
+                    <div class="message-time">${time}</div>
+                `;
+                
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
                 // Send public message
                 socket.emit('sendPublicMessage', {
                     content,
@@ -1341,6 +1358,21 @@
                     }
                 });
             } else if (currentChatFriend) {
+                // Show private message immediately
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message sent';
+                messageElement.id = 'temp-' + tempId;
+                
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                messageElement.innerHTML = `
+                    <div class="message-content">${content}</div>
+                    <div class="message-time">${time}</div>
+                `;
+                
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
                 // Send private message
                 socket.emit('sendMessage', {
                     receiverId: currentChatFriend._id,
@@ -1394,6 +1426,12 @@
 
         // Handle message sent confirmation
         function handleMessageSent(message) {
+            // Remove the temporary message and replace with the confirmed one
+            const tempMessages = document.querySelectorAll('[id^="temp-"]');
+            if (tempMessages.length > 0) {
+                tempMessages[tempMessages.length - 1].remove();
+            }
+            
             const messageElement = document.createElement('div');
             messageElement.className = 'message sent';
             
